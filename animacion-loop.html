@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loop 5s</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f0f0f;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100vw, calc(100vh * 9 / 16));
+      height: auto;
+      aspect-ratio: 9 / 16;
+      background: #111;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hint {
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      font: 500 12px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <canvas id="c" width="1080" height="1920"></canvas>
+    <div class="hint">Loop perfecto de 5s</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const W = 1080;
+    const H = 1920;
+    const TAU = Math.PI * 2;
+    const DURATION = 5000;
+    const MANUAL_RENDER = new URLSearchParams(location.search).has('render');
+    const img = new Image();
+    window.__ready = false;
+    img.src = '646b484b2a70b16dd8eaa02a749667c8.jpg';
+
+    const walkers = [
+      {
+        a: [-140, 1260],
+        b: [520, 820],
+        scale: 1.02,
+        alpha: 0.52,
+        phase: 0.08,
+        speed: 0.96,
+        tone: ['rgba(255, 223, 145, 0.80)', 'rgba(255, 191, 108, 0.36)'],
+        edge: ['rgba(60, 24, 34, 0.78)', 'rgba(60, 24, 34, 0.16)'],
+        arm: 0.42,
+        leg: 0.56,
+        lean: -0.14
+      },
+      {
+        a: [1040, 1240],
+        b: [340, 760],
+        scale: 1.18,
+        alpha: 0.62,
+        phase: 0.22,
+        speed: 1.02,
+        tone: ['rgba(255, 236, 135, 0.90)', 'rgba(255, 214, 100, 0.40)'],
+        edge: ['rgba(72, 24, 30, 0.80)', 'rgba(72, 24, 30, 0.18)'],
+        arm: 0.50,
+        leg: 0.62,
+        lean: 0.12
+      },
+      {
+        a: [-120, 860],
+        b: [610, 600],
+        scale: 0.96,
+        alpha: 0.42,
+        phase: 0.43,
+        speed: 0.86,
+        tone: ['rgba(255, 233, 182, 0.72)', 'rgba(255, 216, 140, 0.30)'],
+        edge: ['rgba(56, 42, 30, 0.68)', 'rgba(56, 42, 30, 0.14)'],
+        arm: 0.34,
+        leg: 0.48,
+        lean: -0.05
+      },
+      {
+        a: [1120, 760],
+        b: [540, 1280],
+        scale: 1.22,
+        alpha: 0.58,
+        phase: 0.61,
+        speed: 1.06,
+        tone: ['rgba(255, 204, 160, 0.82)', 'rgba(255, 168, 132, 0.36)'],
+        edge: ['rgba(78, 24, 34, 0.76)', 'rgba(78, 24, 34, 0.18)'],
+        arm: 0.46,
+        leg: 0.58,
+        lean: 0.18
+      },
+      {
+        a: [-160, 540],
+        b: [720, 980],
+        scale: 0.90,
+        alpha: 0.36,
+        phase: 0.79,
+        speed: 1.12,
+        tone: ['rgba(255, 179, 134, 0.70)', 'rgba(255, 152, 120, 0.28)'],
+        edge: ['rgba(34, 24, 28, 0.66)', 'rgba(34, 24, 28, 0.14)'],
+        arm: 0.30,
+        leg: 0.44,
+        lean: -0.10
+      },
+      {
+        a: [1160, 500],
+        b: [470, 1080],
+        scale: 1.08,
+        alpha: 0.46,
+        phase: 0.94,
+        speed: 0.98,
+        tone: ['rgba(255, 218, 150, 0.74)', 'rgba(255, 182, 120, 0.30)'],
+        edge: ['rgba(58, 28, 30, 0.72)', 'rgba(58, 28, 30, 0.16)'],
+        arm: 0.38,
+        leg: 0.52,
+        lean: 0.06
+      }
+    ];
+
+    function coverRect(imgW, imgH, outW, outH, scale = 1) {
+      const r = Math.max(outW / imgW, outH / imgH) * scale;
+      const w = imgW * r;
+      const h = imgH * r;
+      return {
+        x: (outW - w) * 0.5,
+        y: (outH - h) * 0.5,
+        w,
+        h
+      };
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function triangleWave(t) {
+      const x = t - Math.floor(t);
+      return 1 - Math.abs(2 * x - 1);
+    }
+
+    function easeInOut(t) {
+      return t * t * (3 - 2 * t);
+    }
+
+    function walkerState(fig, p) {
+      const local = (p * fig.speed + fig.phase) % 1;
+      const travel = triangleWave(local);
+      const gait = TAU * ((p * fig.speed * 2.0 + fig.phase) % 1);
+      const x = lerp(fig.a[0], fig.b[0], easeInOut(travel));
+      const y = lerp(fig.a[1], fig.b[1], easeInOut(travel));
+      const stride = Math.sin(gait);
+      const bob = Math.abs(Math.sin(gait * 0.5)) * 18;
+      const dx = fig.b[0] - fig.a[0];
+      const dy = fig.b[1] - fig.a[1];
+      const angle = Math.atan2(dy, dx);
+      return {
+        x,
+        y: y - bob,
+        scale: fig.scale * (0.98 + 0.05 * Math.sin(TAU * ((p + fig.phase * 0.5) % 1))),
+        tilt: fig.lean + angle * 0.18 + 0.08 * stride,
+        alpha: fig.alpha * (0.82 + 0.18 * Math.cos(gait * 0.5)),
+        stride,
+        gait,
+        angle
+      };
+    }
+
+    function drawBackdrop(p) {
+      const breath = 1.012 + 0.006 * Math.sin(TAU * p);
+      const driftX = 18 * Math.sin(TAU * p * 2 + 0.6);
+      const driftY = 12 * Math.cos(TAU * p * 2 + 1.4);
+      const rect = coverRect(img.width, img.height, W, H, breath);
+
+      ctx.save();
+      ctx.filter = 'blur(1px) saturate(1.08) contrast(1.02)';
+      ctx.drawImage(img, rect.x + driftX, rect.y + driftY, rect.w, rect.h);
+      ctx.restore();
+
+      const wash = ctx.createLinearGradient(0, 0, W, H);
+      wash.addColorStop(0, 'rgba(255, 233, 175, 0.08)');
+      wash.addColorStop(0.4, 'rgba(255, 170, 150, 0.04)');
+      wash.addColorStop(0.8, 'rgba(255, 120, 140, 0.05)');
+      wash.addColorStop(1, 'rgba(20, 10, 20, 0.08)');
+      ctx.fillStyle = wash;
+      ctx.fillRect(0, 0, W, H);
+
+      const vignette = ctx.createRadialGradient(W * 0.5, H * 0.46, H * 0.14, W * 0.5, H * 0.5, H * 0.68);
+      vignette.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      vignette.addColorStop(0.6, 'rgba(0, 0, 0, 0.06)');
+      vignette.addColorStop(1, 'rgba(0, 0, 0, 0.34)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawWalker(fig, p, trailPhase = 0) {
+      const s = walkerState(fig, (p - trailPhase + 1) % 1);
+      const alpha = Math.max(0, s.alpha * (1 - trailPhase * 8.5));
+      const scale = s.scale;
+      const x = s.x;
+      const y = s.y;
+      const step = s.stride;
+      const stepMirror = Math.sin(s.gait + Math.PI);
+      const shadowW = 58 * scale;
+      const shadowH = 14 * scale;
+      const shadowSkew = 0.35 * Math.sin(s.gait);
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(s.tilt);
+      ctx.globalAlpha = alpha;
+
+      const blur = 12 + trailPhase * 8;
+      ctx.filter = `blur(${blur}px)`;
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Ground shadow to anchor the walker.
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.26)';
+      ctx.beginPath();
+      ctx.ellipse(0, 138 * scale, shadowW, shadowH, shadowSkew, 0, TAU);
+      ctx.fill();
+
+      // Legs.
+      const hipY = 54 * scale;
+      const kneeLift = 52 * scale;
+      const footReach = 86 * scale;
+      const leftFront = step > 0 ? 1 : -1;
+      const rightFront = -leftFront;
+      const upperSwing = 0.75 * scale;
+      const armSwing = 0.62 * scale;
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = fig.edge[0];
+      ctx.lineWidth = 17 * scale;
+
+      ctx.beginPath();
+      ctx.moveTo(-18 * scale, hipY);
+      ctx.lineTo(-26 * scale - upperSwing * leftFront * 6, hipY + kneeLift * 0.55);
+      ctx.lineTo(-34 * scale - upperSwing * leftFront * 12, hipY + footReach);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(18 * scale, hipY);
+      ctx.lineTo(28 * scale + upperSwing * rightFront * 6, hipY + kneeLift * 0.58);
+      ctx.lineTo(38 * scale + upperSwing * rightFront * 12, hipY + footReach * 1.02);
+      ctx.stroke();
+
+      // Arms.
+      ctx.lineWidth = 13 * scale;
+      ctx.beginPath();
+      ctx.moveTo(-16 * scale, -28 * scale);
+      ctx.lineTo(-34 * scale - armSwing * rightFront * 9, 8 * scale);
+      ctx.lineTo(-52 * scale - armSwing * rightFront * 14, 42 * scale);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(16 * scale, -28 * scale);
+      ctx.lineTo(34 * scale + armSwing * leftFront * 9, 8 * scale);
+      ctx.lineTo(52 * scale + armSwing * leftFront * 14, 42 * scale);
+      ctx.stroke();
+
+      // Body.
+      const bodyGrad = ctx.createLinearGradient(0, -90 * scale, 0, 130 * scale);
+      bodyGrad.addColorStop(0, fig.edge[0]);
+      bodyGrad.addColorStop(1, fig.edge[1]);
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      ctx.roundRect(-48 * scale, -70 * scale, 96 * scale, 168 * scale, 48 * scale);
+      ctx.fill();
+
+      // Torso glow that still reads as a body, not a free-floating blur.
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = ctx.createLinearGradient(0, -100 * scale, 0, 130 * scale);
+      glow.addColorStop(0, fig.tone[0]);
+      glow.addColorStop(1, fig.tone[1]);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.roundRect(-42 * scale, -62 * scale, 84 * scale, 150 * scale, 42 * scale);
+      ctx.fill();
+
+      // Head.
+      ctx.beginPath();
+      ctx.fillStyle = fig.tone[0];
+      ctx.ellipse(0, -120 * scale, 28 * scale, 32 * scale, 0, 0, TAU);
+      ctx.fill();
+
+      // Subtle shoulder and hip masses for silhouette.
+      ctx.globalAlpha *= 0.8;
+      ctx.beginPath();
+      ctx.ellipse(0, -22 * scale, 62 * scale, 34 * scale, 0.1, 0, TAU);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(0, 70 * scale, 44 * scale, 24 * scale, 0.08, 0, TAU);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawFrame(ms) {
+      const p = (ms % DURATION) / DURATION;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0f0f0f';
+      ctx.fillRect(0, 0, W, H);
+
+      drawBackdrop(p);
+
+      const trail = [0.00, 0.015, 0.03, 0.045];
+      for (const fig of walkers) {
+        for (let i = trail.length - 1; i >= 0; i--) {
+          drawWalker(fig, p, trail[i]);
+        }
+      }
+
+      // Soft directional haze to reinforce the crossing motion.
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const sweep = ctx.createLinearGradient(0, H * 0.2, W, H * 0.85);
+      sweep.addColorStop(0, 'rgba(255, 190, 110, 0.035)');
+      sweep.addColorStop(0.45, 'rgba(255, 195, 165, 0.04)');
+      sweep.addColorStop(1, 'rgba(255, 120, 150, 0.03)');
+      ctx.fillStyle = sweep;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+
+      if (!MANUAL_RENDER) {
+        requestAnimationFrame(drawFrame);
+      }
+    }
+
+    window.__renderFrameAt = (ms) => {
+      drawFrame(ms);
+      return canvas.toDataURL('image/png');
+    };
+
+    img.onload = () => {
+      window.__ready = true;
+      if (MANUAL_RENDER) {
+        drawFrame(0);
+      } else {
+        requestAnimationFrame(drawFrame);
+      }
+    };
+    img.onerror = () => {
+      window.__ready = false;
+      console.error('No se pudo cargar la imagen base.');
+    };
+  </script>
+</body>
+</html>

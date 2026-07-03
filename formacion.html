@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freud Grado Cero — Cruces Analíticos</title>
+  <meta name="description" content="Desarmar la teoría para una práctica situada. Un año para recorrer los textos freudianos y dejarse interpelar por ellos." />
+  <link rel="stylesheet" href="https://use.typekit.net/pha7yzm.css" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --blanco: #ffffff;
+      --hueso: #f5f1e8;
+      --hueso2: #ede7d4;
+      --negro: #111009;
+      --gris: #6b6660;
+      --gris-claro: #c8c4bc;
+      --gris-linea: #e2ddd4;
+      --violeta: #b098d3;
+      --violeta-deep: #7a5fa8;
+      --violeta-pale: #ede8f7;
+      --naranja: #c8662a;
+      --naranja-light: #f0a070;
+      --naranja-pale: #fdf0e8;
+      --font-display: "scandia-web", sans-serif;
+      --font-serif: Georgia, "Times New Roman", serif;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--negro);
+      color: var(--hueso);
+      font-family: var(--font-display);
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+
+    /* GRAIN */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.018;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      width: 100%;
+      z-index: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.4rem 4rem;
+      transition: background 0.4s, padding 0.4s, box-shadow 0.4s;
+    }
+    nav.scrolled {
+      background: var(--blanco);
+      box-shadow: 0 1px 0 var(--gris-linea);
+      padding: 1rem 4rem;
+    }
+    .nav-logo svg path { fill: var(--violeta); }
+    nav.scrolled .nav-logo svg path { fill: var(--violeta-deep); }
+    .nav-links { list-style: none; display: flex; gap: 2.5rem; align-items: center; }
+    .nav-links a {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,241,232,0.75);
+      transition: color 0.25s;
+    }
+    .nav-links a:hover { color: var(--hueso); }
+    nav.scrolled .nav-links a { color: rgba(20,18,12,0.75); }
+    nav.scrolled .nav-links a:hover { color: var(--negro); }
+    .nav-active { color: var(--violeta) !important; }
+    nav.scrolled .nav-active { color: var(--violeta-deep) !important; }
+    .nav-cta {
+      background: rgba(176,152,211,0.15);
+      border: 1px solid rgba(176,152,211,0.3);
+      color: var(--violeta) !important;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.7rem !important;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: background 0.25s, border-color 0.25s, color 0.25s !important;
+    }
+    .nav-cta:hover { background: var(--violeta-deep) !important; border-color: var(--violeta-deep); color: var(--blanco) !important; }
+    nav.scrolled .nav-cta { background: var(--violeta-deep) !important; color: var(--blanco) !important; border: none; }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+    .nav-hamburger span { width: 22px; height: 1.5px; background: var(--hueso); transition: background 0.3s; }
+    nav.scrolled .nav-hamburger span { background: var(--negro); }
+
+    /* HERO */
+    .hero {
+      min-height: 70vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 10rem 4rem 6rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(245,241,232,0.08);
+    }
+    .hero-orb-1 {
+      position: absolute;
+      top: -10%; right: -5%;
+      width: 600px; height: 500px;
+      background: rgba(122,95,168,0.25);
+      filter: blur(120px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-orb-2 {
+      position: absolute;
+      bottom: -20%; left: 10%;
+      width: 400px; height: 400px;
+      background: rgba(200,102,42,0.12);
+      filter: blur(100px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: min(1200px, calc(100vw - 2rem));
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--naranja);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .hero-titulo {
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--hueso);
+      margin-bottom: 0.75rem;
+    }
+    .hero-bajada {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: rgba(245,241,232,0.65);
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(200,102,42,0.15);
+      border: 1px solid rgba(200,102,42,0.35);
+      color: var(--naranja-light);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.1rem;
+      font-weight: 600;
+    }
+
+    /* SECCIONES BASE */
+    section { border-bottom: 1px solid rgba(245,241,232,0.08); }
+    .content-max {
+      width: min(1200px, calc(100vw - 2rem));
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .section-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gris-claro);
+      margin-bottom: 1rem;
+    }
+
+    /* ENFOQUE */
+    .enfoque {
+      padding: 6rem 4rem;
+      background: var(--hueso);
+      color: var(--negro);
+      border-bottom: 1px solid var(--gris-linea);
+    }
+    .enfoque-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    /* PROGRAMA */
+    .programa {
+      padding: 7rem 4rem;
+      background: var(--negro);
+    }
+    .programa-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 5rem;
+      gap: 3rem;
+    }
+    .programa-titulo {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--hueso);
+      line-height: 1.15;
+    }
+    .programa-intro {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: rgba(245,241,232,0.6);
+      max-width: 480px;
+    }
+    .programa-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid rgba(245,241,232,0.08);
+    }
+    .modulo {
+      padding: 3rem 2.5rem;
+      border-right: 1px solid rgba(245,241,232,0.08);
+      border-bottom: 1px solid rgba(245,241,232,0.08);
+    }
+    .modulo:nth-child(3n) { border-right: none; }
+    .modulo-num {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--violeta);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .modulo-titulo {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--hueso);
+      margin-bottom: 1rem;
+      line-height: 1.35;
+    }
+    .modulo-texto {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: rgba(245,241,232,0.55);
+    }
+
+    /* DOCENTES */
+    .docentes {
+      padding: 7rem 4rem;
+      background: var(--hueso);
+      color: var(--negro);
+    }
+    .docentes .section-eyebrow { color: var(--gris); }
+    .docentes-titulo {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--negro);
+      margin-bottom: 4rem;
+      line-height: 1.15;
+    }
+    .docentes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+    .docente-card {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      padding: 2.5rem;
+      background: var(--blanco);
+      border: 1px solid var(--gris-linea);
+    }
+    .docente-foto {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--gris-linea);
+    }
+    .docente-nombre {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--negro);
+      margin-bottom: 0.3rem;
+    }
+    .docente-rol {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--violeta-deep);
+      margin-bottom: 0.9rem;
+      font-weight: 600;
+    }
+    .docente-bio {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--gris);
+    }
+
+    /* MODALIDAD */
+    .modalidad {
+      padding: 7rem 4rem;
+      background: var(--negro);
+    }
+    .modalidad-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    .modalidad-titulo {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--hueso);
+      margin-bottom: 2.5rem;
+      line-height: 1.15;
+    }
+    .modalidad-texto {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: rgba(245,241,232,0.6);
+      margin-bottom: 2rem;
+    }
+    .datos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid rgba(245,241,232,0.08);
+    }
+    .dato {
+      padding: 2rem 2rem;
+      border-right: 1px solid rgba(245,241,232,0.08);
+      border-bottom: 1px solid rgba(245,241,232,0.08);
+    }
+    .dato--full { grid-column: 1 / -1; border-right: none; }
+    .dato:nth-child(2n):not(.dato--full) { border-right: none; }
+    .dato:nth-last-child(-n+2):not(.dato--full) { border-bottom: none; }
+    .dato-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gris-claro);
+      margin-bottom: 0.6rem;
+    }
+    .dato-valor {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--hueso);
+      line-height: 1.3;
+    }
+    .dato-valor span {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: rgba(245,241,232,0.5);
+      margin-top: 0.25rem;
+    }
+
+    /* CTA */
+    .cta {
+      padding: 8rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--negro);
+    }
+    .cta-orb {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 400px;
+      background: rgba(122,95,168,0.2);
+      filter: blur(120px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; }
+    .cta-titulo {
+      font-size: clamp(2rem, 4vw, 4rem);
+      font-weight: 700;
+      color: var(--hueso);
+      margin-bottom: 1rem;
+      line-height: 1.15;
+    }
+    .cta-subtitulo {
+      font-size: 1rem;
+      color: rgba(245,241,232,0.55);
+      margin-bottom: 3rem;
+      line-height: 1.7;
+    }
+    .cta-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-filled {
+      background: var(--violeta-deep);
+      color: var(--blanco);
+      padding: 1rem 2.2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--font-display);
+      font-weight: 600;
+      transition: background 0.25s;
+      display: inline-block;
+    }
+    .btn-filled:hover { background: #6a4f98; }
+    .btn-outline {
+      border: 1px solid rgba(245,241,232,0.25);
+      color: rgba(245,241,232,0.75);
+      padding: 1rem 2.2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--font-display);
+      transition: border-color 0.25s, color 0.25s;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--hueso); color: var(--hueso); }
+
+    /* FOOTER */
+    footer {
+      background: var(--blanco);
+      color: var(--negro);
+      padding: 5rem 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid var(--gris-linea);
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 4rem;
+      margin-bottom: 4rem;
+      padding-bottom: 4rem;
+      border-bottom: 1px solid var(--gris-linea);
+      width: min(1200px, calc(100vw - 2rem));
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .footer-marca { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--negro); margin-bottom: 1rem; }
+    .footer-frase { font-size: 0.9rem; line-height: 1.8; color: var(--gris); font-style: italic; }
+    .footer-col-titulo { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gris-claro); margin-bottom: 1.5rem; }
+    .footer-nav { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+    .footer-nav a { font-size: 0.75rem; color: var(--gris); transition: color 0.25s; }
+    .footer-nav a:hover { color: var(--violeta-deep); }
+    .footer-contact { display: flex; flex-direction: column; gap: 0.8rem; }
+    .footer-contact-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.72rem; color: var(--gris); transition: color 0.25s; }
+    .footer-contact-item:hover { color: var(--violeta-deep); }
+    .footer-icon { width: 28px; height: 28px; border: 1px solid var(--gris-linea); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; flex-shrink: 0; color: var(--violeta-deep); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: min(1200px, calc(100vw - 2rem));
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .footer-copy { font-size: 0.72rem; letter-spacing: 0.1em; color: var(--gris-claro); }
+    .footer-lugar { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--violeta-deep); }
+
+    /* ANIMATIONS */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up-delay-1 { transition-delay: 0.1s; }
+    .fade-up-delay-2 { transition-delay: 0.2s; }
+    .fade-up-delay-3 { transition-delay: 0.3s; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .content-max,
+      .footer-top,
+      .footer-bottom { width: min(1200px, calc(100vw - 4rem)); }
+
+      nav { padding: 1.2rem 2rem; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+
+      .hero { padding: 8rem 2rem 5rem; }
+      .enfoque { padding: 5rem 2rem; }
+      .enfoque-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .programa { padding: 5rem 2rem; }
+      .programa-header { flex-direction: column; gap: 1.5rem; }
+      .programa-grid { grid-template-columns: 1fr; }
+      .modulo { border-right: none; }
+      .docentes { padding: 5rem 2rem; }
+      .docentes-grid { grid-template-columns: 1fr; }
+      .docente-card { flex-direction: column; }
+      .modalidad { padding: 5rem 2rem; }
+      .modalidad-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .cta { padding: 6rem 2rem; }
+      .cta-btns { flex-direction: column; align-items: flex-start; }
+      footer { padding: 4rem 2rem 2.5rem; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-bottom: 2.5rem; padding-bottom: 2.5rem; }
+    }
+    @media (max-width: 600px) {
+      .footer-top { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+      .datos-grid { grid-template-columns: 1fr; }
+      .dato { border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="index.html" class="nav-logo" aria-label="Cruces Analíticos — inicio" style="display:flex;align-items:center;">
+      <img src="SVG/CA-Horizontal.svg" height="22" alt="Cruces Analíticos" style="display:block;" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#formacion" class="nav-active">Formación</a></li>
+      <li><a href="index.html#pilares">Supervisión</a></li>
+      <li><a href="index.html#pilares">Clínica</a></li>
+      <li><a href="index.html#cine">Cine</a></li>
+      <li><a href="index.html#nosotros">Nosotros</a></li>
+      <li><a href="index.html#contacto" class="nav-cta">Consultar</a></li>
+    </ul>
+    <button class="nav-hamburger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-orb-1"></div>
+    <div class="hero-orb-2"></div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow fade-up">Ciclo de Formación</p>
+      <h1 class="hero-titulo fade-up fade-up-delay-1">Freud Grado Cero</h1>
+      <p class="hero-bajada fade-up fade-up-delay-2">Desarmar la teoría para una práctica situada</p>
+      <span class="hero-badge fade-up fade-up-delay-3">Comienza en agosto 2026</span>
+    </div>
+  </section>
+
+  <!-- MANIFIESTO DEL CURSO -->
+  <section class="enfoque">
+    <div class="content-max enfoque-inner">
+      <div>
+        <p class="section-eyebrow fade-up" style="color:var(--gris);">El enfoque</p>
+        <h2 class="fade-up fade-up-delay-1" style="font-size:clamp(1.6rem,2.5vw,2.2rem); font-weight:700; line-height:1.2; color:var(--negro); margin-bottom:2rem;">Una práctica<br>situada</h2>
+        <p class="fade-up fade-up-delay-2" style="font-size:0.95rem; line-height:1.9; color:var(--gris); margin-bottom:1.2rem;">Este espacio es un compromiso con la lectura crítica y la producción de un saber-hacer desde acá —Sudamérica— y desde la actualidad. Como sostiene Lacan, el Psicoanálisis es una praxis para sentirse mejor, para no penar de más.</p>
+        <p class="fade-up fade-up-delay-3" style="font-size:0.95rem; line-height:1.9; color:var(--gris); margin-bottom:1.8rem;">Creemos que la vigencia de los desarrollos freudianos nos permite escuchar mejor, aliviar a nuestros pacientes. Poder intervenir sobre el padecimiento subjetivo.</p>
+        <blockquote class="fade-up" style="border-left: 2px solid var(--naranja); padding-left: 2rem; margin-bottom: 1.8rem;">
+          <p style="font-size:1.05rem; line-height:1.85; color:var(--negro); font-style:italic;">"La complejidad de los conflictos humanos obliga al analista a amigarse con el azar, con el 'No saber', con la incertidumbre. También con los obstáculos y con las inseguridades."</p>
+        </blockquote>
+        <p class="fade-up" style="font-size:0.95rem; line-height:1.9; color:var(--gris);">El paciente no atraviesa un espacio de terapia sin angustia, sin incertidumbres, vacilaciones, dudas. El analista cuando escucha tampoco. Ningún paciente está en un libro. Sumergirnos en la obra freudiana puede darnos pistas para sortear los atolladeros que la clínica conlleva.</p>
+      </div>
+      <div>
+        <img src="freud-grado-cero/freud-meme.jpg" alt="Freud meme" class="fade-up" style="width:100%; display:block;" />
+      </div>
+    </div>
+    <!-- swap order via CSS so image is left, text is right -->
+    <style>
+      .enfoque-inner > div:first-child { order: 2; }
+      .enfoque-inner > div:last-child  { order: 1; }
+      @media (max-width: 768px) {
+        .enfoque-inner > div:first-child { order: 1; }
+        .enfoque-inner > div:last-child  { order: 2; }
+      }
+    </style>
+  </section>
+
+  <!-- PROGRAMA -->
+  <section class="programa">
+    <div class="content-max">
+      <div class="programa-header">
+        <div>
+          <p class="section-eyebrow fade-up">La propuesta</p>
+          <h2 class="programa-titulo fade-up fade-up-delay-1">¿Por qué<br>Freud hoy?</h2>
+        </div>
+        <div>
+          <p class="programa-intro fade-up fade-up-delay-2">Nadie llega a la obra freudiana desde cero. La noción de "grado cero" es una invitación: un retorno a los cimientos del pensamiento freudiano para recuperar su potencia subversiva. No se trata de leer a Freud como un archivo histórico, sino como una herramienta viva y punzante.</p>
+          <p class="programa-intro fade-up fade-up-delay-3" style="margin-top:1.2rem;">¿Puede su obra interpelar las nuevas desigualdades, la vida postpandemia? ¿Dialogar con la perspectiva de género, las guerras actuales, el uso del celular y las redes? ¿Sirve para interrogar las subjetividades contemporáneas? Un año para recorrer los textos, pero sobre todo, para dejarse interpelar por ellos.</p>
+        </div>
+      </div>
+      <div class="programa-grid">
+        <div class="modulo fade-up">
+          <p class="modulo-num">Módulo 01</p>
+          <h3 class="modulo-titulo">Fundamentos del psicoanálisis</h3>
+          <p class="modulo-texto">Revisión de los conceptos estructurantes: inconsciente, transferencia, repetición. Lectura situada desde el contexto latinoamericano.</p>
+        </div>
+        <div class="modulo fade-up fade-up-delay-1">
+          <p class="modulo-num">Módulo 02</p>
+          <h3 class="modulo-titulo">Clínica contemporánea</h3>
+          <p class="modulo-texto">Las presentaciones actuales del malestar. Abordaje de las subjetividades del siglo XXI: vínculos, cuerpo, tecnología y lazo social.</p>
+        </div>
+        <div class="modulo fade-up fade-up-delay-2">
+          <p class="modulo-num">Módulo 03</p>
+          <h3 class="modulo-titulo">Psicoanálisis y cultura</h3>
+          <p class="modulo-texto">Cruces entre el cine, la literatura y la práctica clínica. Lectura de producciones culturales como vía de acceso a lo contemporáneo.</p>
+        </div>
+        <div class="modulo fade-up">
+          <p class="modulo-num">Módulo 04</p>
+          <h3 class="modulo-titulo">La dirección de la cura</h3>
+          <p class="modulo-texto">Intervención y escucha analítica. El dispositivo clínico: encuadre, setting, manejo de la transferencia y el acto analítico.</p>
+        </div>
+        <div class="modulo fade-up fade-up-delay-1">
+          <p class="modulo-num">Módulo 05</p>
+          <h3 class="modulo-titulo">Psicoanálisis situado</h3>
+          <p class="modulo-texto">La práctica clínica en el sur global. Género, clase, territorialidad y diversidad como ejes de lectura y de escucha.</p>
+        </div>
+        <div class="modulo fade-up fade-up-delay-2">
+          <p class="modulo-num">Módulo 06</p>
+          <h3 class="modulo-titulo">Presentación de casos</h3>
+          <p class="modulo-texto">Espacio clínico de cierre. Cada participante presenta un fragmento de su práctica para pensar en conjunto desde los recorridos del ciclo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCENTES -->
+  <section class="docentes">
+    <div class="content-max">
+      <p class="section-eyebrow fade-up">Quiénes enseñan</p>
+      <h2 class="docentes-titulo fade-up fade-up-delay-1">Los docentes</h2>
+      <div class="docentes-grid">
+        <div class="docente-card fade-up">
+          <img src="Rodrigo.jpg" alt="Rodrigo Sosa Raverta" class="docente-foto" />
+          <div>
+            <div class="docente-nombre">Rodrigo Sosa Raverta</div>
+            <div class="docente-rol">Psicoanalista · Co-fundador</div>
+            <p class="docente-bio">Psicólogo clínico con orientación psicoanalítica. Co-fundador de Cruces Analíticos. Trabaja en la intersección entre clínica, cultura y subjetividades contemporáneas.</p>
+          </div>
+        </div>
+        <div class="docente-card fade-up fade-up-delay-1">
+          <img src="Martin.jpg" alt="Martín Brignardello" class="docente-foto" />
+          <div>
+            <div class="docente-nombre">Martín Brignardello</div>
+            <div class="docente-rol">Psicoanalista · Co-fundador</div>
+            <p class="docente-bio">Psicólogo clínico con orientación psicoanalítica. Co-fundador de Cruces Analíticos. Especializado en clínica con adultos y en la transmisión del psicoanálisis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODALIDAD -->
+  <section class="modalidad">
+    <div class="content-max">
+      <div class="modalidad-inner">
+        <div>
+          <p class="section-eyebrow fade-up">Cómo funciona</p>
+          <h2 class="modalidad-titulo fade-up fade-up-delay-1">Modalidad<br>y frecuencia</h2>
+          <p class="modalidad-texto fade-up fade-up-delay-2">El ciclo se desarrolla en encuentros quincenales de dos horas, en formato virtual. Los grupos son reducidos para garantizar una escucha singular y un intercambio real entre los participantes.</p>
+          <p class="modalidad-texto fade-up fade-up-delay-3">Cada encuentro combina lectura teórica, discusión clínica y un eje cultural (película, texto literario, fragmento musical) como disparador de conversación.</p>
+          <p class="modalidad-texto fade-up" style="margin-top:0;">El material del ciclo se comparte a través de <strong>Google Classroom</strong>, donde encontrarán los textos, grabaciones y recursos de cada módulo.</p>
+        </div>
+        <div class="datos-grid fade-up fade-up-delay-1">
+          <div class="dato dato--full">
+            <div class="dato-label">Inicio</div>
+            <div class="dato-valor" style="color:var(--violeta);">Agosto 2026<span style="color:rgba(245,241,232,0.5);">Primera quincena</span></div>
+          </div>
+          <div class="dato">
+            <div class="dato-label">Frecuencia</div>
+            <div class="dato-valor">Quincenal<span>Viernes a confirmar</span></div>
+          </div>
+          <div class="dato">
+            <div class="dato-label">Duración</div>
+            <div class="dato-valor">6 módulos<span>Aprox. 6 meses</span></div>
+          </div>
+          <div class="dato">
+            <div class="dato-label">Modalidad</div>
+            <div class="dato-valor">Virtual<span>Grupos reducidos</span></div>
+          </div>
+          <div class="dato">
+            <div class="dato-label">Arancel</div>
+            <div class="dato-valor">A consultar<span>Por WhatsApp</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-orb"></div>
+    <div class="cta-inner content-max">
+      <h2 class="cta-titulo fade-up">¿Querés sumarte<br>al ciclo?</h2>
+      <p class="cta-subtitulo fade-up fade-up-delay-1">Escribinos para consultar sobre el programa, fechas y aranceles.<br>Los cupos son limitados.</p>
+      <div class="cta-btns fade-up fade-up-delay-2">
+        <a href="https://wa.me/54XXXXXXXXXX?text=Hola%2C%20quiero%20m%C3%A1s%20info%20sobre%20el%20Ciclo%20de%20Formaci%C3%B3n" target="_blank" class="btn-filled">Consultar por WhatsApp →</a>
+        <a href="mailto:hola@crucesanaliticos.com" class="btn-outline">Escribir por email</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="footer-marca">Cruces Analíticos</div>
+        <p class="footer-frase">Psicoanálisis situado.<br>Desde Latinoamérica,<br>para el aquí y ahora.</p>
+      </div>
+      <div>
+        <div class="footer-col-titulo">Espacios</div>
+        <ul class="footer-nav">
+          <li><a href="formacion.html">Ciclo de formación</a></li>
+          <li><a href="index.html#pilares">Ciclo de supervisión</a></li>
+          <li><a href="index.html#pilares">Centro derivador</a></li>
+          <li><a href="index.html#cine">Ciclo de cine</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-titulo">Proyecto</div>
+        <ul class="footer-nav">
+          <li><a href="index.html#manifiesto">Manifiesto</a></li>
+          <li><a href="index.html#nosotros">Quiénes somos</a></li>
+          <li><a href="index.html#actividades">Próximas actividades</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-titulo">Contacto</div>
+        <div class="footer-contact">
+          <a href="https://instagram.com/crucesanaliticos" target="_blank" class="footer-contact-item">
+            <span class="footer-icon">ig</span>@crucesanaliticos
+          </a>
+          <a href="mailto:hola@crucesanaliticos.com" class="footer-contact-item">
+            <span class="footer-icon">✉</span>hola@crucesanaliticos.com
+          </a>
+          <a href="https://wa.me/54XXXXXXXXXX" target="_blank" class="footer-contact-item">
+            <span class="footer-icon">wp</span>WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 Cruces Analíticos. Todos los derechos reservados.</span>
+      <span class="footer-lugar">Argentina · Latinoamérica</span>
+    </div>
+  </footer>
+
+  <script>
+    // Fade-up animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Nav scroll
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 80) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>
